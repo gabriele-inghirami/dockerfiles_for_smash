@@ -1,2 +1,4 @@
-# dockerfiles_for_smash
-A few unofficial and often experimental Dockerfiles to run SMASH
+## DISCLAIMER
+
+In this repository there are a few unofficial Dockerfiles to run [SMASH](https://github.com/smash-transport/smash), where *unofficial* means that they are modified versions of the official ones, distributed according to the GPLv3 license, but they are not sponsored, reviewed or approved by the SMASH Team.
+Compared to the official ones distributed with SMASH, they are more experimental in nature and they might have some additional programs, more recent versions of third part software/libraries like Root or Rivet or they can be based on different GNU/Linux distributions (e.g. Fedora instead of Ubuntu). However, they also lack the internal reviews and the checks that are done by the SMASH Team, they are provided "as they are", without any guarantee that they work correctly, so, please, *use at your own risk*.
