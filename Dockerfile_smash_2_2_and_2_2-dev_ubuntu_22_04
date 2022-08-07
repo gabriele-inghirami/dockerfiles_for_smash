@@ -1,0 +1,578 @@
+# we import a basic GNU/Linux distribution from the Docker repositories
+
+FROM ubuntu:22.04
+
+# we add some info about authors and contacts
+
+LABEL maintainer.name="SMASH team"
+LABEL maintainer.website="https://smash-transport.github.io"
+
+# we set the repositories to be used to upgrade and expand the basic GNU/Linux distribution
+
+RUN echo "deb http://ftp.uni-mainz.de/ubuntu/ jammy restricted multiverse main universe" > /etc/apt/sources.list \
+&& echo "deb http://ftp.uni-mainz.de/ubuntu/ jammy-updates restricted multiverse main universe" >> /etc/apt/sources.list \
+&& echo "deb http://ftp.uni-mainz.de/ubuntu/ jammy-security restricted multiverse main universe" >> /etc/apt/sources.list
+
+# we want to install the packages non interactively
+
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections 
+
+
+# we update the distribution and we install several additional packages
+
+RUN apt-get update && \
+ln -sf /usr/share/zoneinfo/UTC /etc/localtime && \
+apt-get -y upgrade && \
+apt-get -y install \
+adduser  \
+apt  \
+aptdaemon  \
+aptdaemon-data  \
+apt-utils \
+aspell  \
+aspell-en  \
+at-spi2-core  \
+autoconf  \
+automake  \
+autotools-dev  \
+base-files  \
+base-passwd  \
+bash  \
+bc \
+binfmt-support  \
+binutils  \
+binutils-common  \
+binutils-x86-64-linux-gnu  \
+bsdmainutils  \
+bsdutils  \
+build-essential  \
+bzip2  \
+ca-certificates  \
+clang-13  \
+clang-tidy  \
+clang-tidy-13  \
+clang-tools-13  \
+cmake  \
+cmake-data  \
+coreutils  \
+cpp  \
+curl  \
+cython3 \
+ddd  \
+debconf  \
+debianutils  \
+desktop-file-utils  \
+dictionaries-common  \
+diffutils  \
+dirmngr  \
+distro-info-data  \
+dmsetup  \
+dns-root-data  \
+dnsmasq-base  \
+docbook-xml  \
+doxygen  \
+dpkg  \
+dpkg-dev  \
+e2fsprogs  \
+emacsen-common  \
+evince  \
+evince-common  \
+fakeroot  \
+fdisk  \
+file  \
+findutils  \
+fontconfig  \
+fontconfig-config  \
+fonts-dejavu-core  \
+fonts-droid-fallback  \
+fonts-freefont-ttf  \
+fonts-lyx  \
+fonts-noto-mono  \
+fonts-urw-base35  \
+freeglut3  \
+freeglut3-dev  \
+g++  \
+gawk  \
+gcc  \
+gcr  \
+gdb  \
+gdbserver  \
+gettext-base  \
+gfortran  \
+git  \
+git-man  \
+gnome-shell  \
+gnome-shell-common  \
+gnome-startup-applications  \
+gnome-user-docs  \
+gnupg  \
+gnupg-l10n  \
+gnupg-utils  \
+gnuplot  \
+gnuplot-data  \
+gnuplot-qt  \
+gperf  \
+gpg  \
+gpg-agent  \
+gpg-wks-client  \
+gpg-wks-server  \
+gpgconf  \
+gpgsm  \
+gpgv  \
+graphviz \
+grep  \
+groff-base  \
+gzip  \
+hostname  \
+hunspell-en-us  \
+ibus  \
+ibus-data  \
+imagemagick \
+ipython3  \
+iso-codes  \
+iw  \
+javascript-common  \
+keyboard-configuration  \
+kmod  \
+krb5-locales  \
+language-pack-en  \
+language-pack-en-base  \
+language-selector-common  \
+language-selector-gnome  \
+less  \
+libbinutils  \
+libblas3  \
+libboost-filesystem-dev  \
+libc-bin  \
+libc-dev-bin  \
+libc6  \
+libc6-dbg  \
+libc6-dev  \
+libcfitsio-dev \
+libeigen3-dev \
+libfftw3-bin  \
+libfftw3-dev  \
+libfftw3-double3  \
+libfftw3-long3  \
+libfftw3-quad3  \
+libfftw3-single3  \
+libftgl-dev \
+libgfortran-11-dev  \
+libgif-dev  \
+libgl-dev  \
+libglew-dev \
+libgmp-dev  \
+libgraphene-1.0-0  \
+libgraphviz-dev  \
+libgsl-dev  \
+libjpeg-dev \
+liblzma-dev  \
+libmpfr-dev  \
+libmpfrc++-dev  \
+libmysqlclient-dev \
+libopenmpi-dev \
+libpcre3-dev \
+libpcre++-dev  \
+libpng-dev  \
+libpng-tools  \
+libpython3-dev  \
+libpython3-stdlib  \
+libsqlite3-dev  \
+libssl-dev  \
+libstdc++-11-dev  \
+libstdc++6  \
+libtiff-dev  \
+libtinyxml2-dev \
+libtool  \
+libx11-dev  \
+libxext-dev \
+libxft-dev \
+libxml2-dev \
+libxpm-dev \
+llvm-13  \
+llvm-13-dev  \
+llvm-13-runtime  \
+llvm-13-tools  \
+locales  \
+login  \
+logsave  \
+lsb-base  \
+lsb-release  \
+lzma  \
+m4  \
+make  \
+man-db  \
+manpages  \
+manpages-dev  \
+mawk  \
+mesa-vulkan-drivers \
+mime-support  \
+mount  \
+mousetweaks  \
+mysql-common  \
+ncurses-base  \
+ncurses-bin  \
+netbase  \
+odbcinst  \
+openmpi-bin \
+openssh-client  \
+openssl  \
+p11-kit  \
+p11-kit-modules  \
+packagekit  \
+packagekit-tools  \
+passwd  \
+patch  \
+pci.ids  \
+psmisc \
+perl  \
+perl-base  \
+pinentry-curses  \
+pinentry-gnome3  \
+pkg-config  \
+poppler-data  \
+procps  \
+publicsuffix  \
+python-dev-is-python3  \
+python-matplotlib-data  \
+python3  \
+python3-apport  \
+python3-apt  \
+python3-args  \
+python3-atomicwrites  \
+python3-attr  \
+python3-backcall  \
+python3-blinker  \
+python3-bs4  \
+python3-cairo  \
+python3-certifi  \
+python3-cffi-backend  \
+python3-chardet  \
+python3-colorama  \
+python3-cryptography  \
+python3-cycler  \
+python3-dateutil  \
+python3-dbus  \
+python3-decorator  \
+python3-defer  \
+python3-dev  \
+python3-distro  \
+python3-distutils  \
+python3-entrypoints  \
+python3-et-xmlfile  \
+python3-future  \
+python3-gi  \
+python3-html5lib  \
+python3-httplib2  \
+python3-ibus-1.0  \
+python3-idna  \
+python3-importlib-metadata  \
+python3-ipython  \
+python3-ipython-genutils  \
+python3-jdcal  \
+python3-jedi  \
+python3-joblib  \
+python3-jwt  \
+python3-keyring  \
+python3-kiwisolver  \
+python3-lib2to3  \
+python3-lxml  \
+python3-lz4  \
+python3-macaroonbakery  \
+python3-matplotlib  \
+python3-minimal  \
+python3-mpi4py \
+python3-more-itertools  \
+python3-nacl  \
+python3-numexpr  \
+python3-numpy  \
+python3-numpy-dev  \
+python3-oauthlib  \
+python3-olefile  \
+python3-openpyxl  \
+python3-packaging  \
+python3-pandas  \
+python3-pandas-lib  \
+python3-parso  \
+python3-patsy  \
+python3-pexpect  \
+python3-pickleshare  \
+python3-pkg-resources  \
+python3-pluggy  \
+python3-problem-report  \
+python3-prompt-toolkit  \
+python3-protobuf  \
+python3-psutil  \
+python3-ptyprocess  \
+python3-py  \
+python3-pygments  \
+python3-pymacaroons  \
+python3-pyparsing  \
+python3-pytest  \
+python3-requests  \
+python3-requests-unixsocket  \
+python3-scipy  \
+python3-seaborn  \
+python3-secretstorage  \
+python3-setuptools  \
+python3-simplejson  \
+python3-six  \
+python3-soupsieve  \
+python3-spyder  \
+python3-statsmodels  \
+python3-systemd  \
+python3-tables  \
+python3-tables-lib  \
+python3-talloc  \
+python3-tk  \
+python3-traitlets  \
+python3-tz  \
+python3-urllib3  \
+python3-wadllib  \
+python3-wcwidth  \
+python3-webencodings  \
+python3-xlrd  \
+python3-xlwt  \
+python3-yaml  \
+python3-zipp  \
+python3  \
+python3-dev  \
+qiv  \
+readline-common  \
+rsync  \
+rtkit  \
+rygel  \
+samba-libs  \
+sane-utils  \
+screen  \
+sed  \
+sensible-utils  \
+session-migration  \
+sgml-base  \
+sgml-data  \
+shared-mime-info  \
+sound-theme-freedesktop  \
+sqlite3  \
+tar  \
+texlive-latex-base \
+texlive-pstricks \
+time \
+tk \
+ttf-bitstream-vera  \
+tzdata  \
+ubuntu-docs  \
+ubuntu-keyring  \
+ubuntu-mono  \
+ubuntu-session  \
+ucf  \
+udev  \
+unixodbc-dev  \
+unzip  \
+update-inetd  \
+upower  \
+usbmuxd  \
+util-linux  \
+uuid-dev  \
+valgrind  \
+vim  \
+vim-common  \
+vim-runtime  \
+wget  \
+x11-common  \
+x11-xkb-utils  \
+x11-xserver-utils  \
+xauth  \
+xdot \
+xfonts-base  \
+xfonts-encodings  \
+xfonts-utils  \
+xkb-data  \
+xml-core  \
+xorg-sgml-doctools  \
+xserver-common  \
+xserver-xorg  \
+xserver-xorg-core  \
+xserver-xorg-input-all  \
+xserver-xorg-input-libinput  \
+xserver-xorg-legacy  \
+xserver-xorg-video-all  \
+xserver-xorg-video-amdgpu  \
+xserver-xorg-video-ati  \
+xserver-xorg-video-fbdev  \
+xserver-xorg-video-intel  \
+xserver-xorg-video-nouveau  \
+xserver-xorg-video-qxl  \
+xserver-xorg-video-radeon  \
+xserver-xorg-video-vesa  \
+xserver-xorg-video-vmware  \
+xtrans-dev  \
+xxd  \
+xz-utils  \
+yelp  \
+yelp-xsl  \
+zenity  \
+zenity-common  \
+zip  
+
+# we create the /SMASH directory
+
+WORKDIR /SMASH
+COPY smash-devel /SMASH/smash
+
+# here we download and install several libraries/programs used by SMASH
+
+ARG pythiaV="8307"
+
+RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
+tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
+cd pythia${pythiaV} && \
+./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=/SMASH/pythia_install&& \
+make -j$(nproc) && \
+make install && \
+echo /SMASH/pythia_install/lib >> /etc/ld.so.conf && ldconfig
+ENV PYTHIA8=/SMASH/pythia_install/
+ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
+ENV PYTHIA_LIBRARY=$PYTHIA8/lib
+ENV PYTHIA_INCLUDE=$PYTHIA8/include
+ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
+ENV PATH=$PYTHIA8/bin:$PATH
+
+ARG rootV="6.26.06"
+
+RUN cd /SMASH && \
+wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
+tar xf root_v${rootV}.source.tar.gz && \
+mv root-${rootV} root_src && \
+mkdir -p root_install && \
+mkdir -p root_build && \
+cd root_build && \
+cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64 -std=c++17" -Dxrootd=OFF && \
+cmake --build . --target install -j$(nproc)
+ENV ROOTSYS=/SMASH/root_install
+ENV PATH=$ROOTSYS/bin:$PATH
+ENV LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
+ENV SHLIB_PATH=$ROOTSYS/lib
+ENV LIBPATH=$ROOTSYS/lib
+ENV PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
+ENV MANPATH=$ROOTSYS/man:$MANPATH
+ENV CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH
+ENV JUPYTER_PATH=$ROOTSYS/etc/notebook:$JUPYTER_PATH
+ENV JUPYTER_CONFIG_DIR=$ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
+ENV CLING_STANDARD_PCH=none
+RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig && \
+echo /SMASH/hepmc3_install/lib >> /etc/ld.so.conf && ldconfig
+
+ARG hepmcV="3.2.5"
+
+RUN cd /SMASH && \
+wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmcV}.tar.gz && \
+tar xf HepMC3-${hepmcV}.tar.gz && \
+mkdir -p HepMC3_build && \
+cd HepMC3_build && \
+cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=ON -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64 -std=c++17" ../HepMC3-${hepmcV} && \
+make -j$(nproc) && \
+make install
+ENV PATH="/SMASH/hepmc3_install/bin:$PATH"
+ENV LD_LIBRARY_PATH="/SMASH/hepmc3_install/lib:$LD_LIBRARY_PATH"
+
+RUN cd /SMASH && \
+git clone https://github.com/hoxu/gitstats.git && \
+cd gitstats && \
+make install
+
+ARG cppcheckV="2.8"
+ARG cpplintV="1.6.0"
+
+RUN cd /SMASH && \
+wget https://github.com/danmar/cppcheck/archive/${cppcheckV}.tar.gz && \
+tar xf ${cppcheckV}.tar.gz && \
+cd cppcheck-${cppcheckV} && \
+mkdir -p build && cd build && cmake .. && cmake --build . && \
+cd /SMASH && wget https://github.com/cpplint/cpplint/archive/refs/tags/${cpplintV}.tar.gz && tar xf ${cpplintV}.tar.gz && \
+mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck-${cppcheckV}/build/bin/cppcheck cpplint-${cpplintV}/cpplint.py /SMASH/auxiliary_progs/  && \
+chmod +x /SMASH/auxiliary_progs/*
+ENV PATH=$PATH:/SMASH/auxiliary_progs
+
+# now we install Rivet, first fixing a few details in the bootstrap script
+
+ARG rivetV="3.1.6"
+
+RUN mkdir -p rivet_build && cd rivet_build 
+RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/${rivetV}/rivet-bootstrap
+# we set the Rivet installation directory
+#RUN sed -i "12s/\$PWD\/local/\/SMASH\/Rivet_install/" rivet-bootstrap
+# we set the number of concurrent compilation processes
+RUN sed -i "13s/j3/j$(nproc)/" rivet-bootstrap
+# we disable the installation of hepmc3, already installed
+#RUN sed -i "15s/1/0/" rivet-bootstrap
+# we use c++ standard 17
+#RUN sed -i "36s/14/17/" rivet-bootstrap
+# we update the hepmc3 version
+#RUN sed -i "18s/2.06.11/${hepmcV}/" rivet-bootstrap
+# we provide the hepm3 installation path
+#RUN sed -i "56s/usr/\/SMASH\/hepmc3_install/" rivet-bootstrap
+# at the moment the new yoda version is not available at the usual place
+#RUN sed -i "183s/http:\/\/cedar-tools.web.cern.ch\/downloads\/YODA-\$YODA_VERSION.tar.gz/https:\/\/yoda.hepforge.org\/downloads?f=YODA-\$YODA_VERSION.tar.gz\ -O\ YODA-\$YODA_VERSION.tar.gz/" rivet-bootstrap
+# we want compile only the MC analyses
+RUN sed -i '200i     sed -i "545,559d;561,569d" analyses/Makefile.in' rivet-bootstrap
+RUN sed -i '201i     rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]*' rivet-bootstrap
+
+# now we really compile and install Rivet
+ENV PYTHON=/usr/bin/python3
+ARG CXXDIALECT="c++17"
+ARG INSTALL_HEPMC="0"
+ARG INSTALL_PREFIX="/SMASH/Rivet_install"
+ARG HEPMCPATH="/SMASH/hepmc3_install/"
+ARG HEPMC_VERSION="3.2.5"
+
+RUN chmod +x rivet-bootstrap && \
+./rivet-bootstrap && \
+echo /SMASH/Rivet_install/lib >> /etc/ld.so.conf && \
+echo /SMASH/Rivet_install/lib64 >> /etc/ld.so.conf && \
+ldconfig 
+
+ENV PATH=/SMASH/Rivet_install/bin:$PATH
+ENV LD_LIBRARY_PATH="/SMASH/Rivet_install/lib:/SMASH/Rivet_install/lib64:$LD_LIBRARY_PATH"
+ENV PYTHONPATH="/SMASH/Rivet_install/lib/python3.10/site-packages:$PYTHONPATH"
+ENV TEXMFHOME="/SMASH/Rivet_install/share/Rivet/texmf:$TEXMFHOME"
+ENV HOMETEXMF="/SMASH/Rivet_install/share/Rivet/texmf:$HOMETEXMF"
+ENV TEXMFCNF="/SMASH/Rivet_install/share/Rivet/texmf/cnf:$TEXMFCNF"
+ENV TEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$TEXINPUTS"
+ENV LATEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
+
+# eventually, we download and compile SMASH
+
+RUN cd /SMASH 
+#RUN git clone https://github.com/smash-transport/smash.git && \
+#mv smash-devel smash && \
+RUN mkdir -p smash_bin && \
+cd smash_bin && \
+cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
+-DCMAKE_CXX_STANDARD=17 && make -j$(nproc)
+ENV PATH=$PATH:/SMASH/smash_bin
+
+# we remove most of the sources
+
+RUN cd /SMASH && \
+rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src rivet_build /var/cache/apt/archives/*.deb cython-* fastjet-* fjcontrib-* Rivet-* YODA-*
+
+# we allow Imagemagick to process PS, EPS and PDF files
+RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
+
+# we set a few other environment variables
+
+ENV LC_ALL=en_US.UTF-8
+ENV LANG en=US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+
+# shell prompt
+
+ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
+
+# we set up the shell prompt during the container execution, this works when we convert the Docker into a Singularity container
+
+RUN mkdir -p /.singularity.d/env/ && \
+CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
+echo '#!/bin/bash' > $CUSTOM_ENV && \
+echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "' >> $CUSTOM_ENV && \
+chmod 755 $CUSTOM_ENV
