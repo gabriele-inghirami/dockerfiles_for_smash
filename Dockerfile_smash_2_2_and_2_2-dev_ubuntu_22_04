@@ -108,9 +108,8 @@ gnome-user-docs  \
 gnupg  \
 gnupg-l10n  \
 gnupg-utils  \
-gnuplot  \
 gnuplot-data  \
-gnuplot-qt  \
+gnuplot-x11  \
 gperf  \
 gpg  \
 gpg-agent  \
@@ -417,7 +416,14 @@ zip
 # we create the /SMASH directory
 
 WORKDIR /SMASH
-COPY smash-devel /SMASH/smash
+
+# uncomment the next line to build a local copy of the development version
+# COPY smash-devel /SMASH/smash
+
+# we use set generic x86-64 architecture optimization flags for compilation using makefiles
+
+ARG CPPFLAGS="-O3 -march=x86-64 --std=c++17"
+ARG CFLAGS="-O3 -march=x86-64"
 
 # here we download and install several libraries/programs used by SMASH
 
@@ -487,7 +493,7 @@ RUN cd /SMASH && \
 wget https://github.com/danmar/cppcheck/archive/${cppcheckV}.tar.gz && \
 tar xf ${cppcheckV}.tar.gz && \
 cd cppcheck-${cppcheckV} && \
-mkdir -p build && cd build && cmake .. && cmake --build . && \
+mkdir -p build && cd build && cmake .. -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64 -std=c++17" && cmake --build . && \
 cd /SMASH && wget https://github.com/cpplint/cpplint/archive/refs/tags/${cpplintV}.tar.gz && tar xf ${cpplintV}.tar.gz && \
 mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck-${cppcheckV}/build/bin/cppcheck cpplint-${cpplintV}/cpplint.py /SMASH/auxiliary_progs/  && \
 chmod +x /SMASH/auxiliary_progs/*
@@ -542,9 +548,17 @@ ENV LATEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
 
 # eventually, we download and compile SMASH
 
-RUN cd /SMASH 
-#RUN git clone https://github.com/smash-transport/smash.git && \
-#mv smash-devel smash && \
+RUN cd /SMASH
+
+# comment the next line if you are building a local copy of the development version
+RUN git clone https://github.com/smash-transport/smash.git 
+
+# uncomment the next line line if you are building a local copy of the development version
+# RUN mv smash-devel smash
+
+# to make the container more portable, we replace the flags -march=native with -march=x86-64
+RUN cd smash && for i in $(find ./ -depth -name "*"); do if [ ! -d $i ]; then sed -i 's/-march=native/-march=x86-64/' $i; fi; done && cd -
+
 RUN mkdir -p smash_bin && \
 cd smash_bin && \
 cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
