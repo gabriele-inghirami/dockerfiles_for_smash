@@ -43,6 +43,7 @@ binfmt-support  \
 binutils  \
 binutils-common  \
 binutils-x86-64-linux-gnu  \
+bison \
 bsdmainutils  \
 bsdutils  \
 build-essential  \
@@ -81,6 +82,7 @@ fakeroot  \
 fdisk  \
 file  \
 findutils  \
+flex \
 fontconfig  \
 fontconfig-config  \
 fonts-dejavu-core  \
@@ -499,52 +501,76 @@ mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck-${cppcheckV}/build/bin/cppcheck 
 chmod +x /SMASH/auxiliary_progs/*
 ENV PATH=$PATH:/SMASH/auxiliary_progs
 
-# now we install Rivet, first fixing a few details in the bootstrap script
+# now we install Rivet. 
+# The versionis of the dependent libraries are chosen according to the bootstrap script downloadable from the Rivet website.
 
-ARG rivetV="3.1.6"
-
-RUN mkdir -p rivet_build && cd rivet_build 
-RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/${rivetV}/rivet-bootstrap
-# we set the Rivet installation directory
-#RUN sed -i "12s/\$PWD\/local/\/SMASH\/Rivet_install/" rivet-bootstrap
-# we set the number of concurrent compilation processes
-RUN sed -i "13s/j3/j$(nproc)/" rivet-bootstrap
-# we disable the installation of hepmc3, already installed
-#RUN sed -i "15s/1/0/" rivet-bootstrap
-# we use c++ standard 17
-#RUN sed -i "36s/14/17/" rivet-bootstrap
-# we update the hepmc3 version
-#RUN sed -i "18s/2.06.11/${hepmcV}/" rivet-bootstrap
-# we provide the hepm3 installation path
-#RUN sed -i "56s/usr/\/SMASH\/hepmc3_install/" rivet-bootstrap
-# at the moment the new yoda version is not available at the usual place
-#RUN sed -i "183s/http:\/\/cedar-tools.web.cern.ch\/downloads\/YODA-\$YODA_VERSION.tar.gz/https:\/\/yoda.hepforge.org\/downloads?f=YODA-\$YODA_VERSION.tar.gz\ -O\ YODA-\$YODA_VERSION.tar.gz/" rivet-bootstrap
-# we want compile only the MC analyses
-RUN sed -i '200i     sed -i "545,559d;561,569d" analyses/Makefile.in' rivet-bootstrap
-RUN sed -i '201i     rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]*' rivet-bootstrap
-
-# now we really compile and install Rivet
-ENV PYTHON=/usr/bin/python3
+ARG RIVET_VERSION="3.1.6"
+ARG YODA_VERSION="1.9.6"
+ARG FASTJET_VERSION="3.4.0"
+ARG FJCONTRIB_VERSION="1.049"
 ARG CXXDIALECT="c++17"
-ARG INSTALL_HEPMC="0"
 ARG INSTALL_PREFIX="/SMASH/Rivet_install"
-ARG HEPMCPATH="/SMASH/hepmc3_install/"
-ARG HEPMC_VERSION="3.2.5"
+ARG HEPMCPATH="/SMASH/hepmc3_install"
+ARG BUILD_PREFIX="/SMASH/rivet_build"
 
-RUN chmod +x rivet-bootstrap && \
-./rivet-bootstrap && \
-echo /SMASH/Rivet_install/lib >> /etc/ld.so.conf && \
-echo /SMASH/Rivet_install/lib64 >> /etc/ld.so.conf && \
-ldconfig 
-
+ENV PYTHON=/usr/bin/python3
 ENV PATH=/SMASH/Rivet_install/bin:$PATH
 ENV LD_LIBRARY_PATH="/SMASH/Rivet_install/lib:/SMASH/Rivet_install/lib64:$LD_LIBRARY_PATH"
-ENV PYTHONPATH="/SMASH/Rivet_install/lib/python3.10/site-packages:$PYTHONPATH"
-ENV TEXMFHOME="/SMASH/Rivet_install/share/Rivet/texmf:$TEXMFHOME"
-ENV HOMETEXMF="/SMASH/Rivet_install/share/Rivet/texmf:$HOMETEXMF"
-ENV TEXMFCNF="/SMASH/Rivet_install/share/Rivet/texmf/cnf:$TEXMFCNF"
-ENV TEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$TEXINPUTS"
-ENV LATEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
+
+RUN mkdir -p $INSTALL_PREFIX/etc/bash_completion.d && mkdir -p $INSTALL_PREFIX/lib && ln -s lib $INSTALL_PREFIX/lib64
+
+RUN mkdir -p $BUILD_PREFIX && cd $BUILD_PREFIX
+
+RUN wget --no-check-certificate --no-verbose http://www.fastjet.fr/repo/fastjet-$FASTJET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fastjet-$FASTJET_VERSION && ./configure --prefix=$INSTALL_PREFIX --enable-shared --disable-auto-ptr --enable-allcxxplugins &&\
+make -j$(nproc) && make install
+ARG FASTJETPATH=$INSTALL_PREFIX
+
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/fjcontrib-$FJCONTRIB_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fjcontrib-$FJCONTRIB_VERSION && ./configure --fastjet-config=$FASTJETPATH/bin/fastjet-config CXXFLAGS=-fPIC &&\
+sed -i.bak -e 's/#include <array>/#include <array>\n#include <limits>/' LundPlane/EEHelpers.hh &&\
+make -j1 fragile-shared-install && make install
+
+# We use the system cython, but we keep this script half prepared in case that future versions of Rivet need something more recent or specific
+#ARG CYTHON_VERSION="0.29.30"
+#RUN cd $BUILD_PREFIX &&\
+#wget --no-check-certificate --no-verbose https://github.com/cython/cython/archive/$CYTHON_VERSION.tar.gz -O- | tar --no-same-owner -xz
+#ARG PATH=$BUILD_PREFIX/cython-$CYTHON_VERSION/bin:$PATH
+#ARG PYTHONPATH=$BUILD_PREFIX/cython-$CYTHON_VERSION:$PYTHONPATH
+
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/YODA-$YODA_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd YODA-$YODA_VERSION && ./configure --prefix=$INSTALL_PREFIX && make -j$(nproc) && make install && cp yodaenv.sh $INSTALL_PREFIX/yodaenv.sh
+ARG YODAPATH=$INSTALL_PREFIX
+
+# here, with sed and rm, we remove most of the experimental analyses. The lines need to be checked and possibly adjusted at each Rivet release.
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-$RIVET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd Rivet-$RIVET_VERSION &&\
+sed -i "545,559d;561,569d" analyses/Makefile.in && rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]* &&\
+./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH -with-hepmc3=$HEPMCPATH --with-fastjet=$FASTJETPATH &&\
+make -j$(nproc) && make install && cp rivetenv.sh $INSTALL_PREFIX
+
+RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && \
+ldconfig 
+
+ENV PYTHONPATH="$INSTALL_PREFIX/lib/python3.10/site-packages:$PYTHONPATH"
+ENV TEXMFHOME="$INSTALL_PREFIX/share/Rivet/texmf:$TEXMFHOME"
+ENV HOMETEXMF="$INSTALL_PREFIX/share/Rivet/texmf:$HOMETEXMF"
+ENV TEXMFCNF="$INSTALL_PREFIX/share/Rivet/texmf/cnf:$TEXMFCNF"
+ENV TEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$TEXINPUTS"
+ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
+
+# we install julia
+
+ARG julia_majV="1.8"
+ARG julia_minV="0"
+
+RUN cd /opt &&\
+wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
+tar xf julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
+ENV PATH=/opt/julia-${julia_majV}.${julia_minV}/bin:$PATH
 
 # eventually, we download and compile SMASH
 
@@ -568,7 +594,7 @@ ENV PATH=$PATH:/SMASH/smash_bin
 # we remove most of the sources
 
 RUN cd /SMASH && \
-rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src rivet_build /var/cache/apt/archives/*.deb cython-* fastjet-* fjcontrib-* Rivet-* YODA-*
+rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb /opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
 
 # we allow Imagemagick to process PS, EPS and PDF files
 RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
