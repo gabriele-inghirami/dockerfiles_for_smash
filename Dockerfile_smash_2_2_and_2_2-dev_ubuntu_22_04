@@ -504,8 +504,8 @@ ENV PATH=$PATH:/SMASH/auxiliary_progs
 # now we install Rivet. 
 # The versionis of the dependent libraries are chosen according to the bootstrap script downloadable from the Rivet website.
 
-ARG RIVET_VERSION="3.1.6"
-ARG YODA_VERSION="1.9.6"
+ARG RIVET_VERSION="3.1.7"
+ARG YODA_VERSION="1.9.7"
 ARG FASTJET_VERSION="3.4.0"
 ARG FJCONTRIB_VERSION="1.049"
 ARG CXXDIALECT="c++17"
@@ -544,11 +544,11 @@ wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/download
 cd YODA-$YODA_VERSION && ./configure --prefix=$INSTALL_PREFIX && make -j$(nproc) && make install && cp yodaenv.sh $INSTALL_PREFIX/yodaenv.sh
 ARG YODAPATH=$INSTALL_PREFIX
 
-# here, with sed and rm, we remove most of the experimental analyses. The lines need to be checked and possibly adjusted at each Rivet release.
+# here, with sed and rm, we remove most of the experimental analyses. The lines need to be checked and probably adjusted at each new Rivet release.
 RUN cd $BUILD_PREFIX &&\
 wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-$RIVET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
 cd Rivet-$RIVET_VERSION &&\
-sed -i "545,559d;561,569d" analyses/Makefile.in && rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]* &&\
+sed -i "542,556d;558,566d" analyses/Makefile.in && rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]* &&\
 ./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH -with-hepmc3=$HEPMCPATH --with-fastjet=$FASTJETPATH &&\
 make -j$(nproc) && make install && cp rivetenv.sh $INSTALL_PREFIX
 
@@ -565,7 +565,7 @@ ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
 # we install julia
 
 ARG julia_majV="1.8"
-ARG julia_minV="0"
+ARG julia_minV="2"
 
 RUN cd /opt &&\
 wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
