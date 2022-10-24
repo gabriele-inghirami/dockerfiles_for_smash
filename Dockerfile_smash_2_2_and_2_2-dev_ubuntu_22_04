@@ -359,6 +359,7 @@ texlive-latex-base \
 texlive-pstricks \
 time \
 tk \
+tree \
 ttf-bitstream-vera  \
 tzdata  \
 ubuntu-docs  \
@@ -570,7 +571,8 @@ ARG julia_minV="2"
 RUN cd /opt &&\
 wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
 tar xf julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
-ENV PATH=/opt/julia-${julia_majV}.${julia_minV}/bin:$PATH
+ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}/bin
+ENV PATH=${julia_path}:$PATH
 
 # eventually, we download and compile SMASH
 
@@ -616,3 +618,19 @@ CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
 echo '#!/bin/bash' > $CUSTOM_ENV && \
 echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "' >> $CUSTOM_ENV && \
 chmod 755 $CUSTOM_ENV
+
+# further adjustments that might turn useful
+# lesspipe
+RUN ln -s /usr/bin/lesspipe /usr/bin/lesspipe.sh
+# screen
+RUN mv /usr/bin/screen /usr/bin/screen.exe &&\
+echo "echo 'Executing screen wrapper script around original program /usr/bin/screen.exe'" > /usr/bin/screen &&\
+echo "echo 'We try to set the environment variable SCREENDIR to \$HOME/.screen_dir," >> /usr/bin/screen &&\
+echo "echo 'if this directory is not accessible, please, manually set SCREENDIR to another directory" >> /usr/bin/screen &&\
+echo "echo 'before launching /usr/bin/screen.exe'" >> /usr/bin/screen &&\
+echo "sleep 3" >> /usr/bin/screen &&\
+echo "export SCREENDIR=\$HOME/.screen_dir" >> /usr/bin/screen &&\
+echo "mkdir -p \$SCREENDIR" >> /usr/bin/screen &&\
+echo "chmod 700 \$SCREENDIR" >> /usr/bin/screen &&\
+echo "exec /usr/bin/screen.exe \$@" >> /usr/bin/screen &&\
+chmod 755 /usr/bin/screen
