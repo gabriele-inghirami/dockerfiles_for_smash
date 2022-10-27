@@ -178,6 +178,7 @@ libpng-dev  \
 libpng-tools  \
 libpython3-dev  \
 libpython3-stdlib  \
+libsource-highlight-common \
 libsqlite3-dev  \
 libssl-dev  \
 libstdc++-11-dev  \
@@ -620,8 +621,6 @@ echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ 
 chmod 755 $CUSTOM_ENV
 
 # further adjustments that might turn useful
-# lesspipe
-RUN ln -s /usr/bin/lesspipe /usr/bin/lesspipe.sh
 # screen
 RUN mv /usr/bin/screen /usr/bin/screen.exe &&\
 echo "echo 'Executing screen wrapper script around original program /usr/bin/screen.exe'" > /usr/bin/screen &&\
