@@ -1,0 +1,8 @@
+#we import a basic GNU/Linux distribution from the Docker repositories
+
+FROM fedora:37
+
+#we add some info about authors and contacts
+
+LABEL maintainer.name="Gabriele Inghirami"
+
