@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.4
-
 # Import the base smash container.
 
 FROM ghcr.io/smash-transport/smash:newest
+#FROM ghcr.io/gabriele-inghirami/smash-basic
 
 # Set bash as the default shell in this Dockerfile.
 
@@ -12,7 +12,7 @@ SHELL ["/bin/bash", "-c"]
 
 LABEL maintainer.name="SMASH team"
 LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="SMASH with ROOT 6.26.06, HepMC3 3.2.5, Rivet, 3.1.7 and several other tools"
+LABEL description="SMASH with ROOT 6.26.10, HepMC3 3.2.5, Rivet, 3.1.7 and several other tools"
 LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
 # Install the packages non interactively.
@@ -175,7 +175,7 @@ ARG CFLAGS="-O3 -march=x86-64"
 
 # Install ROOT.
 
-ARG rootV="6.26.06"
+ARG rootV="6.26.10"
 
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
