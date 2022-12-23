@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.4
+
 #we import a basic GNU/Linux distribution from the Docker repositories
 
 FROM fedora:37
@@ -6,3 +8,156 @@ FROM fedora:37
 
 LABEL maintainer.name="Gabriele Inghirami"
 
+# we update the repository
+RUN dnf -y update
+
+# we install the interesting packages
+RUN dnf -y install \
+bash \
+bash-completion \
+bc \
+bzip2 \
+clang-devel \
+clang-libs \
+clang-tools-extra \
+cmake \
+coreutils \
+cppcheck \
+eigen3-devel \
+gawk \
+gcc \
+gcc-c++ \
+gdb \
+gdl \
+gfortran \
+git \
+grep \
+gnuplot \
+gsl-devel \
+HepMC3-devel \
+HepMC3-rootIO-devel \
+ImageMagick \
+julia \
+make \
+openmpi-devel \
+openssh \
+python-ipython \
+python3-matplotlib \
+python3-mpi4py-openmpi \
+python3-numpy \
+python3-openmpi \
+python3-pandas \
+python3-scipy \
+python3-seaborn \
+root \
+rsync \
+screen \
+sed \
+sqlite \
+tar \
+tree \
+unzip \
+valgrind \
+vim \
+wget \
+xz \
+zenity \
+zip 
+
+# we clean the system
+RUN dnf -y clean all
+
+ENV LC_ALL=C
+
+#we create the /BUILD directory
+
+WORKDIR /BUILD
+
+#here we download and install Pythia and Rivet
+
+RUN <<EOF
+for pythiaV in "8307" "8308"
+do
+  wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz
+  tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz
+  cd pythia${pythiaV}
+  ./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=/opt/pythia${pythiaV}
+  make -j$(nproc) && make install 
+done
+EOF
+
+# Install Rivet.
+# The versions of the dependent libraries are chosen according to the bootstrap script downloadable from the Rivet website.
+
+ARG RIVET_VERSION="3.1.7"
+ARG YODA_VERSION="1.9.7"
+ARG FASTJET_VERSION="3.4.0"
+ARG FJCONTRIB_VERSION="1.049"
+ARG CXXDIALECT="c++17"
+ARG INSTALL_PREFIX="/opt/Rivet_install"
+ARG BUILD_PREFIX="/BUILD/rivet_build"
+
+ENV PYTHON=/usr/bin/python3
+ENV PATH=${INSTALL_PREFIX}/bin:$PATH
+ENV LD_LIBRARY_PATH=$INSTALL_PREFIX/lib:$INSTALL_PREFIX/lib64:$LD_LIBRARY_PATH
+
+RUN mkdir -p $INSTALL_PREFIX/etc/bash_completion.d && mkdir -p $INSTALL_PREFIX/lib && ln -s lib $INSTALL_PREFIX/lib64
+
+RUN mkdir -p $BUILD_PREFIX && cd $BUILD_PREFIX
+
+RUN wget --no-check-certificate --no-verbose http://www.fastjet.fr/repo/fastjet-$FASTJET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fastjet-$FASTJET_VERSION && ./configure --prefix=$INSTALL_PREFIX --enable-shared --disable-auto-ptr --enable-allcxxplugins &&\
+make -j$(nproc) && make install
+ARG FASTJETPATH=$INSTALL_PREFIX
+
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/fjcontrib-$FJCONTRIB_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fjcontrib-$FJCONTRIB_VERSION && ./configure --fastjet-config=$FASTJETPATH/bin/fastjet-config CXXFLAGS=-fPIC &&\
+sed -i.bak -e 's/#include <array>/#include <array>\n#include <limits>/' LundPlane/EEHelpers.hh &&\
+make -j1 fragile-shared-install && make install
+
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/YODA-$YODA_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd YODA-$YODA_VERSION && ./configure --prefix=$INSTALL_PREFIX && make -j$(nproc) && make install && cp yodaenv.sh $INSTALL_PREFIX/yodaenv.sh
+ARG YODAPATH=$INSTALL_PREFIX
+
+# Remove all the experimental analyses and leave only the analysis for simulators.
+# The lines need to be checked and probably adjusted at each new Rivet release.
+
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-$RIVET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd Rivet-$RIVET_VERSION &&\
+./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH --with-fastjet=$FASTJETPATH &&\
+make -j$(nproc) && make install && cp rivetenv.sh $INSTALL_PREFIX
+
+RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && ldconfig 
+
+# The python version must be updated together with the underlying linux distribution.
+# Unfortunately something like $(python3 -V | cut -d " " -f 2) does not work in an ENV statement.
+ENV PYTHONPATH="$INSTALL_PREFIX/lib/python3.8.11/site-packages:$PYTHONPATH"
+ENV TEXMFHOME="$INSTALL_PREFIX/share/Rivet/texmf:$TEXMFHOME"
+ENV HOMETEXMF="$INSTALL_PREFIX/share/Rivet/texmf:$HOMETEXMF"
+ENV TEXMFCNF="$INSTALL_PREFIX/share/Rivet/texmf/cnf:$TEXMFCNF"
+ENV TEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$TEXINPUTS"
+ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
+
+# we clean the sources
+RUN rm -rf /BUILD
+
+# we set a few other environment variables
+
+ENV LC_ALL=en_US.UTF-8
+ENV LANG en=US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+
+# shell prompt
+
+ENV PS1="S \[\e]0;\u@\h: \w\a\]:\w\$ "
+
+# we set up the shell prompt during the container execution, this works when we convert the Docker into a Singularity container
+
+RUN mkdir -p /.singularity.d/env/ && \
+CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
+echo '#!/bin/bash' > $CUSTOM_ENV && \
+echo 'PS1="S \[\e]0;\u@\h: \w\a\]:\w\$ "' >> $CUSTOM_ENV && \
+chmod 755 $CUSTOM_ENV
