@@ -23,6 +23,8 @@ clang-tools-extra \
 cmake \
 coreutils \
 cppcheck \
+dot2tex \
+doxygen \
 eigen3-devel \
 gawk \
 gcc \
@@ -31,11 +33,14 @@ gdb \
 gdl \
 gfortran \
 git \
+graphviz \
 grep \
 gnuplot \
 gsl-devel \
 HepMC3-devel \
+HepMC3-interfaces-devel \
 HepMC3-rootIO-devel \
+HepMC3-search-devel \
 ImageMagick \
 julia \
 make \
@@ -62,7 +67,8 @@ vim \
 wget \
 xz \
 zenity \
-zip 
+zip \
+zlib-devel
 
 # we clean the system
 RUN dnf -y clean all
@@ -127,7 +133,7 @@ ARG YODAPATH=$INSTALL_PREFIX
 RUN cd $BUILD_PREFIX &&\
 wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-$RIVET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
 cd Rivet-$RIVET_VERSION &&\
-./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH --with-fastjet=$FASTJETPATH &&\
+./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH --with-fastjet=$FASTJETPATH --with-hepmc3=/usr &&\
 make -j$(nproc) && make install && cp rivetenv.sh $INSTALL_PREFIX
 
 RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && ldconfig 
