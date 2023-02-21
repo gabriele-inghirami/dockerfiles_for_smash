@@ -295,7 +295,7 @@ ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
 # Install julia.
 
 ARG julia_majV="1.8"
-ARG julia_minV="2"
+ARG julia_minV="5"
 
 RUN cd /opt &&\
 wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
