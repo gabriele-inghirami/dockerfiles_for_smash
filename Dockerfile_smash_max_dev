@@ -35,6 +35,9 @@ build-essential  \
 bzip2  \
 ca-certificates  \
 clang-13 \
+clang-format-13 \
+clang-tidy-13 \
+clang-tools-13 \
 coreutils  \
 cython3 \
 ddd  \
@@ -63,12 +66,20 @@ jupyter-notebook \
 libc-bin  \
 libc-dev-bin  \
 libc-devtools \
+libc++-13-dev \
+libc++1-13 \
+libc++abi-13-dev \
+libc++abi1-13 \
+libclang-common-13-dev \
+libclang-cpp13 \
+libclang1-13 \
 libfreetype-dev \
 libgif-dev  \
 libgmp-dev  \
 libgraphviz-dev  \
 libjpeg-dev  \
 libjpeg8-dev  \
+libllvm13 \
 liblzma-dev  \
 libmpfr-dev  \
 libmpfrc++-dev  \
@@ -88,6 +99,8 @@ libzstd-dev \
 linux-libc-dev \
 llvm-13 \
 llvm-13-dev \
+llvm-13-linker-tools \
+llvm-13-runtime \
 llvm-13-tools \
 locales \
 locales-all \
@@ -344,6 +357,9 @@ RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e
 ENV LC_ALL=en_US.UTF-8
 ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
+
+# We set a symbolic link to clang-format-13 to make it usable from the SMASH formatting script
+RUN ln -s /usr/bin/clang-format-13 /usr/bin/clang-format
 
 # Shell prompt when using the container image under Docker.
 
