@@ -361,6 +361,9 @@ ENV LANGUAGE=en_US.UTF-8
 # We set a symbolic link to clang-format-13 to make it usable from the SMASH formatting script
 RUN ln -s /usr/bin/clang-format-13 /usr/bin/clang-format
 
+# we install cmake-format 
+RUN pip install cmakelang
+
 # Shell prompt when using the container image under Docker.
 
 ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
