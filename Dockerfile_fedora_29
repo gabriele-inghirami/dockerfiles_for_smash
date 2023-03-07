@@ -18,16 +18,11 @@ RUN dnf -y update
 RUN dnf -y install \
 bash \
 bash-completion \
-bc \
 bzip2 \
 coreutils \
 eigen3-devel \
 gawk \
-gcc \
 gcc-c++ \
-gdb \
-gdl \
-gfortran \
 git \
 grep \
 gsl-devel \
@@ -40,33 +35,49 @@ unzip \
 vim \
 wget \
 xz \
-zip \
+zip 
+
+# Alternative gcc compiler versions
+#gcc-c++-8.2.1 \
+#gcc-c++-8.3.1 \ 
 
 # we clean the system
 RUN dnf -y clean all
 
 ENV LC_ALL=C
 
-#we create the /BUILD directory
-
-WORKDIR /BUILD
-
-#here we download and install Pythia and Rivet
+# here we download and install Pythia
 
 ARG pythiaV="8309"
 RUN <<EOF
   wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz
   tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz
   cd pythia${pythiaV}
-  ./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=/opt/pythia${pythiaV}
-  make -j$(nproc) && make install 
+  ./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=/usr/local/pythia${pythiaV}
+  make -j$(nproc)
+  make install
+  cd ..
+  rm -rf pythia${pythiaV}
 EOF
 
-# we set a few other environment variables
+# here we download the cmake binaries
+ARG cmakeV="3.16.9"
+RUN cd /usr/local && wget https://cmake.org/files/v3.16/cmake-${cmakeV}-Linux-x86_64.tar.gz && tar xf cmake-${cmakeV}-Linux-x86_64.tar.gz && \
+rm cmake-${cmakeV}-Linux-x86_64.tar.gz
+
+# we set a few environment variables
 
 ENV LC_ALL=en_US.UTF-8
 ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
+
+ENV PATH=/usr/local/cmake-${cmakeV}-Linux-x86_64/bin:$PATH
+ENV PYTHIA8=/usr/local/pythia${pythiaV}
+ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
+ENV PYTHIA_LIBRARY=$PYTHIA8/lib
+ENV PYTHIA_INCLUDE=$PYTHIA8/include
+ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
+ENV PATH=$PYTHIA8/bin:$PATH
 
 # shell prompt
 
