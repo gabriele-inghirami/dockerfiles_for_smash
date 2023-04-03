@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.4
 # Import the base smash container.
 
-FROM ghcr.io/smash-transport/smash:newest
-#FROM ghcr.io/gabriele-inghirami/smash-basic
+#FROM ghcr.io/smash-transport/smash:newest
+FROM ghcr.io/gabriele-inghirami/smash-basic
 
 # Set bash as the default shell in this Dockerfile.
 
@@ -214,7 +214,7 @@ RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig
 
 # Install HepMC3.
 
-ARG hepmcV="3.2.6"
+ARG hepmcV="3.2.5"
 
 RUN cd /SMASH && \
 wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmcV}.tar.gz && \
@@ -358,8 +358,9 @@ ENV LC_ALL=en_US.UTF-8
 ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
-# We set a symbolic link to clang-format-13 to make it usable from the SMASH formatting script
-RUN ln -s /usr/bin/clang-format-13 /usr/bin/clang-format
+# We set a symbolic link to clang-format-13 and clang-tidy-13 to make them usable from the SMASH formatting script
+RUN ln -s /usr/bin/clang-format-13 /usr/bin/clang-format &&\
+ln -s /usr/bin/clang-tidy-13 /usr/bin/clang-tidy
 
 # we install cmake-format 
 RUN pip install cmakelang
