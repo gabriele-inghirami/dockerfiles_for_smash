@@ -30,7 +30,7 @@ vim
 WORKDIR /SMASH
 
 # Create directory for mounting filesystems
-mkdir /MNT
+RUN mkdir /MNT
 
 # Install pythia
 ARG pythiaV="8309"
