@@ -1,0 +1,92 @@
+# syntax=docker/dockerfile:1.4
+
+# this image is meant to provide the enviroment to test the basic
+# SMASH with gcc 8.1
+
+#we import a basic GNU/Linux distribution from the Docker repositories
+
+FROM fedora:29
+
+#we add some info about authors and contacts
+
+LABEL maintainer.name="Gabriele Inghirami"
+
+# we update the repository
+RUN dnf -y update
+
+# we install the interesting packages
+RUN dnf -y install \
+bash \
+bash-completion \
+bzip2 \
+coreutils \
+eigen3-devel \
+gawk \
+gcc-c++ \
+git \
+grep \
+gsl-devel \
+make \
+rsync \
+screen \
+sed \
+tar \
+unzip \
+vim \
+wget \
+xz \
+zip 
+
+# Alternative gcc compiler versions
+#gcc-c++-8.2.1 \
+#gcc-c++-8.3.1 \ 
+
+# we clean the system
+RUN dnf -y clean all
+
+ENV LC_ALL=C
+
+# here we download and install Pythia
+
+ARG pythiaV="8309"
+RUN <<EOF
+  wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz
+  tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz
+  cd pythia${pythiaV}
+  ./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=/usr/local/pythia${pythiaV}
+  make -j$(nproc)
+  make install
+  cd ..
+  rm -rf pythia${pythiaV}
+EOF
+
+# here we download the cmake binaries
+ARG cmakeV="3.16.9"
+RUN cd /usr/local && wget https://cmake.org/files/v3.16/cmake-${cmakeV}-Linux-x86_64.tar.gz && tar xf cmake-${cmakeV}-Linux-x86_64.tar.gz && \
+rm cmake-${cmakeV}-Linux-x86_64.tar.gz
+
+# we set a few environment variables
+
+ENV LC_ALL=en_US.UTF-8
+ENV LANG en=US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+
+ENV PATH=/usr/local/cmake-${cmakeV}-Linux-x86_64/bin:$PATH
+ENV PYTHIA8=/usr/local/pythia${pythiaV}
+ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
+ENV PYTHIA_LIBRARY=$PYTHIA8/lib
+ENV PYTHIA_INCLUDE=$PYTHIA8/include
+ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
+ENV PATH=$PYTHIA8/bin:$PATH
+
+# shell prompt
+
+ENV PS1="S \[\e]0;\u@\h: \w\a\]:\w\$ "
+
+# we set up the shell prompt during the container execution, this works when we convert the Docker into a Singularity container
+
+RUN mkdir -p /.singularity.d/env/ && \
+CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
+echo '#!/bin/bash' > $CUSTOM_ENV && \
+echo 'PS1="S \[\e]0;\u@\h: \w\a\]:\w\$ "' >> $CUSTOM_ENV && \
+chmod 755 $CUSTOM_ENV

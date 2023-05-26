@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.4
 # Import the base smash container.
 
-#FROM ghcr.io/smash-transport/smash:newest
-FROM ghcr.io/gabriele-inghirami/smash-basic
+FROM ghcr.io/smash-transport/smash:newest
+#FROM ghcr.io/gabriele-inghirami/smash-basic
 
 # Set bash as the default shell in this Dockerfile.
 
@@ -10,10 +10,8 @@ SHELL ["/bin/bash", "-c"]
 
 # Add some info about authors and contents.
 
-LABEL maintainer.name="SMASH team"
-LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="SMASH with ROOT 6.26.10, HepMC3 3.2.5, Rivet, 3.1.7 and several other tools"
-LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
+LABEL maintainer.name="Gabriele Inghirami"
+LABEL description="SMASH with ROOT 6.28.04, HepMC3 3.2.6, Rivet, 3.1.8, vhlle, hadron sampler and other tools"
 
 # Install the packages non interactively.
 
@@ -188,7 +186,7 @@ ARG CFLAGS="-O3 -march=x86-64"
 
 # Install ROOT.
 
-ARG rootV="6.26.10"
+ARG rootV="6.28.04"
 
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
@@ -252,8 +250,8 @@ ENV PATH=$PATH:/SMASH/auxiliary_progs
 # Install Rivet.
 # The versions of the dependent libraries are chosen according to the bootstrap script downloadable from the Rivet website.
 
-ARG RIVET_VERSION="3.1.7"
-ARG YODA_VERSION="1.9.7"
+ARG RIVET_VERSION="3.1.8"
+ARG YODA_VERSION="1.9.8"
 ARG FASTJET_VERSION="3.4.0"
 ARG FJCONTRIB_VERSION="1.049"
 ARG CXXDIALECT="c++17"
@@ -307,8 +305,8 @@ ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
 
 # Install julia.
 
-ARG julia_majV="1.8"
-ARG julia_minV="5"
+ARG julia_majV="1.9"
+ARG julia_minV="0"
 
 RUN cd /opt &&\
 wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
@@ -347,6 +345,25 @@ RUN cd /SMASH && \
 rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
 cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb \
 /opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
+
+# Now we download and build vhlle
+
+RUN cd /SMASH && source /SMASH/root_install/bin/thisroot.sh && git clone https://github.com/yukarpenko/vhlle.git &&\
+cd vhlle && git checkout stable_ebe && cd .. && git clone https://github.com/yukarpenko/vhlle_params.git && cd vhlle_params &&\
+mv ic eos ../vhlle/ && mv params/* ../vhlle/params/ && cd .. && rm -rf vhlle_params && cd vhlle &&\
+make
+
+# We include the vhlle directory in the PATH
+
+ENV PATH=/SMASH/vhlle:$PATH
+
+# Now we download and build the sampler
+
+RUN cd /SMASH && git clone https://github.com/smash-transport/smash-hadron-sampler.git && cd smash-hadron-sampler &&\
+cp -r $SMASH_DIR/cmake ./ && mkdir build && cd build && cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config &&\
+make
+
+ENV PATH=/SMASH/smash-hadron-sampler/build:$PATH
 
 # Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
 

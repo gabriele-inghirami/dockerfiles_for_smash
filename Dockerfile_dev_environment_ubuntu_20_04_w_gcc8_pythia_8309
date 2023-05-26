@@ -1284,7 +1284,7 @@ WORKDIR /SMASH
 
 # here we download and install several libraries/programs used by SMASH
 
-ARG pythiaV="8307"
+ARG pythiaV="8309"
 
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
@@ -1300,7 +1300,7 @@ ENV PYTHIA_INCLUDE=$PYTHIA8/include
 ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
 ENV PATH=$PYTHIA8/bin:$PATH
 
-ARG rootV="6.26.00"
+ARG rootV="6.26.10"
 
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
@@ -1422,20 +1422,9 @@ RUN pip3 install matplotlib==3.5.1
 # we install doxygen in /usr/local
 ARG doxygenV="1.9.1"
 
-# RUN wget https://www.doxygen.nl/files/doxygen-${doxygenV}.src.tar.gz && tar xf doxygen-${doxygenV}.src.tar.gz &&\ 
 RUN wget https://downloads.sourceforge.net/project/doxygen/rel-${doxygenV}/doxygen-${doxygenV}.src.tar.gz && tar xf doxygen-${doxygenV}.src.tar.gz &&\
 cd doxygen-${doxygenV} && mkdir build && cd build && cmake -G "Unix Makefiles" .. && make -j$(nproc) && \
 make install
-
-# eventually, we download and compile SMASH
-
-RUN cd /SMASH && \ 
-git clone https://github.com/smash-transport/smash.git && \
-mkdir -p smash_bin && \
-cd smash_bin && \
-cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
--DCMAKE_CXX_STANDARD=17 && make -j$(nproc)
-ENV PATH=$PATH:/SMASH/smash_bin
 
 # we remove most of the sources
 
