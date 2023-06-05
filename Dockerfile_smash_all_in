@@ -52,8 +52,7 @@ gdb  \
 gfortran  \
 gnupg  \
 gnupg-utils  \
-gnuplot  \
-gnuplot-qt  \
+gnuplot-nox  \
 gperf  \
 graphviz \
 grep  \
