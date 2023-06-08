@@ -1,0 +1,98 @@
+# syntax=docker/dockerfile:1.4
+# WARNING: this dockerfile does not work, it stops for a missing TPython.h when compiling yoda, the Fedora root installation migh have some issues
+
+#we import a basic GNU/Linux distribution from the Docker repositories
+
+FROM fedora:38
+
+#we add some info about authors and contacts
+
+LABEL maintainer.name="Gabriele Inghirami"
+
+# we update the repository
+RUN dnf -y update
+
+# we install the interesting packages
+RUN dnf -y install \
+bash \
+bash-completion \
+bc \
+bzip2 \
+clang-devel \
+clang-libs \
+clang-tools-extra \
+cmake \
+coreutils \
+cppcheck \
+dot2tex \
+doxygen \
+eigen3-devel \
+gawk \
+gcc \
+gcc-c++ \
+gdb \
+gdl \
+gfortran \
+git \
+graphviz \
+grep \
+gnuplot-minimal \
+gsl-devel \
+HepMC3-devel \
+HepMC3-interfaces-devel \
+HepMC3-rootIO-devel \
+HepMC3-search-devel \
+ImageMagick \
+julia \
+make \
+openmpi-devel \
+openssh \
+pythia8-devel \
+python-ipython \
+python-unversioned-command \
+python3-HepMC3 \
+python3-HepMC3-rootIO \
+python3-matplotlib \
+python3-mpi4py-openmpi \
+python3-numpy \
+python3-openmpi \
+python3-pandas \
+python3-root \
+python3-scipy \
+python3-seaborn \
+root \
+rsync \
+screen \
+sed \
+sqlite \
+tar \
+tree \
+unzip \
+valgrind \
+vim \
+wget \
+xz \
+zenity \
+zip \
+zlib-devel
+
+# we clean the system
+RUN dnf -y clean all
+
+# we set a few other environment variables
+
+ENV LC_ALL=en_US.UTF-8
+ENV LANG en=US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+
+# shell prompt
+
+ENV PS1="S \[\e]0;\u@\h: \w\a\]:\w\$ "
+
+# we set up the shell prompt during the container execution, this works when we convert the Docker into a Singularity container
+
+RUN mkdir -p /.singularity.d/env/ && \
+CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
+echo '#!/bin/bash' > $CUSTOM_ENV && \
+echo 'PS1="S \[\e]0;\u@\h: \w\a\]:\w\$ "' >> $CUSTOM_ENV && \
+chmod 755 $CUSTOM_ENV
