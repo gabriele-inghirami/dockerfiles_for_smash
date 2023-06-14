@@ -33,6 +33,7 @@ gdb \
 gdl \
 gfortran \
 git \
+glibc-langpack-en \
 graphviz \
 grep \
 gnuplot \
