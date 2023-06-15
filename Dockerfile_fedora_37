@@ -61,6 +61,7 @@ screen \
 sed \
 sqlite \
 tar \
+time \
 tree \
 unzip \
 valgrind \

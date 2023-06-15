@@ -154,6 +154,7 @@ sqlite3  \
 tar  \
 texlive-latex-base \
 texlive-pstricks \
+time \
 tree \
 unzip  \
 util-linux  \
