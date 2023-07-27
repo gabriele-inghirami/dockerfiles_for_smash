@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1.4
 # Import the base smash container.
 
-FROM ghcr.io/smash-transport/smash:newest
-#FROM ghcr.io/gabriele-inghirami/smash-basic
+#FROM ghcr.io/smash-transport/smash:newest
+FROM ghcr.io/gabriele-inghirami/smash-basic
 
 # Set bash as the default shell in this Dockerfile.
 
@@ -306,7 +306,7 @@ ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
 # Install julia.
 
 ARG julia_majV="1.9"
-ARG julia_minV="0"
+ARG julia_minV="2"
 
 RUN cd /opt &&\
 wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
