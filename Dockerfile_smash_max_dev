@@ -20,9 +20,9 @@ ARG TARGET_ARCHITECTURE="x86-64"
 
 # Add some info about authors and contents.
 
-LABEL maintainer.name="SMASH team"
-LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="SMASH with ROOT 6.28.06, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
+LABEL org.opencontainers.image.maintainer.name="SMASH team"
+LABEL org.opencontainers.image.maintainer.website="https://smash-transport.github.io"
+LABEL org.opencontainers.image.description="SMASH with ROOT 6.28.06, HepMC3 3.2.6, Rivet, 3.1.8 and several other tools"
 LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
 # Install the packages non interactively.
@@ -264,8 +264,8 @@ ENV PATH=$PATH:/SMASH/auxiliary_progs
 # Install Rivet.
 # The versions of the dependent libraries are chosen according to the bootstrap script downloadable from the Rivet website.
 
-ARG RIVET_VERSION="3.1.7"
-ARG YODA_VERSION="1.9.7"
+ARG RIVET_VERSION="3.1.8"
+ARG YODA_VERSION="1.9.8"
 ARG FASTJET_VERSION="3.4.0"
 ARG FJCONTRIB_VERSION="1.049"
 ARG CXXDIALECT="c++17"
