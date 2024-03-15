@@ -1,0 +1,77 @@
+# syntax=docker/dockerfile:1.4
+
+FROM ubuntu:22.04
+
+# Set bash as the default shell in this Dockerfile
+SHELL ["/bin/bash", "-c"]
+
+# Add some info about authors and contents
+
+LABEL maintainer.name="Gabriele Ingirami"
+LABEL description="Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
+LABEL org.opencontainers.image.maintainer.website="https://github.com/gabriele-inghirami"
+LABEL org.opencontainers.image.description="Unofficial SMASH (https://github.com/smash-transport) distribution, built from a local copy of the sources"
+ 
+# Install minimal set of requirements
+RUN apt-get update && \
+apt-get -y upgrade && \
+DEBIAN_FRONTEND=noninteractive apt-get -y install \
+bash \
+cmake \
+git \
+g++ \
+libeigen3-dev \
+libgsl-dev \
+rsync \
+wget \
+vim
+
+# Create main project directory
+WORKDIR /SMASH
+
+# We copy the local SMASH repository
+COPY smash-devel /SMASH/smash
+
+# Create directory for mounting filesystems
+RUN mkdir /MNT
+
+# Install pythia
+ARG pythiaV="8311"
+ENV PYTHIA8=/SMASH/pythia_install/
+RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
+tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
+mv pythia${pythiaV} /SMASH/pythia_install/ && \
+cd /SMASH/pythia_install && \
+./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -mavx2 -pthread' --prefix=${PYTHIA8} && \
+make -j$(nproc) && \
+make install && \
+echo ${PYTHIA8}/lib >> /etc/ld.so.conf && ldconfig
+
+ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
+ENV PYTHIA_LIBRARY=$PYTHIA8/lib
+ENV PYTHIA_INCLUDE=$PYTHIA8/include
+ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
+ENV PATH=$PYTHIA8/bin:$PATH
+
+# Get and build public SMASH
+RUN cd /SMASH && \
+mkdir -p smash/build && \
+mkdir -p smash_bin && \
+cd smash/build && \
+cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_C_FLAGS="-march=x86-64 -mavx2" -DCMAKE_CXX_FLAGS="-march=x86-64 -mavx2" \
+|| echo "cmake SMASH build configuration failed!"
+RUN cd /SMASH/smash/build && make smash -j$(nproc) || echo "make SMASH compilation failed!"
+RUN <<EOF
+if [ -f /SMASH/smash/build/smash ]
+then
+  cp /SMASH/smash/build/smash /SMASH/smash_bin/
+  cp /SMASH/smash/build/config.yaml /SMASH/smash_bin/
+  rm -r /SMASH/smash/build
+else
+  rm -r /SMASH/smash /SMASH/smash_bin
+fi
+EOF
+
+# Set PATH
+
+ENV PATH=/SMASH/smash_bin:$PATH

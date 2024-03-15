@@ -6,6 +6,7 @@ Until October, 2023, despite any lack of guarantee, the Dockerfiles in this repo
 
 ## LIST
 - Dockerfile_all_in_ivybridge : Based on Ubuntu 22.04 Jammy Jellifish, it has SMASH-3.0, Pythia 8.309 (default) and 8.310, vHLLE (https://github.com/yukarpenko/vhlle), the smash hadron sampler (https://github.com/smash-transport/smash-hadron-sampler), ROOT 6.26.10, Rivet 3.1.8, HepMC 3.2.6, Julia 1.9.3 and a few more additional software (gdb, ddd, gnuplot-nox, ipython, numpy, scipy, pandas and so on)
+- Dockerfile_basic_local: Based on Ubuntu 22.04, it builds just the local copy of the smash-devel repository with Pythia
 
 ### DISCONTINUED:
 - Dockerfile_smash_2_2_and_2_2-dev_ubuntu_22_04 : Based on Ubuntu 22.04 Jammy Jellyfish, tested with stable version 2.2.1 and parallel dev version. Pythia 8.307, Root 6.26.06, Rivet 3.1.7, HEPMC3 3.2.5, cppcheck 2.8, cpplint 1.6, cmake 3.22.1, gcc 11.3, Doxygen 1.9.1
