@@ -36,7 +36,7 @@ COPY smash-devel /SMASH/smash
 RUN mkdir /MNT
 
 # Install pythia
-ARG pythiaV="8311"
+ARG pythiaV="8312"
 ENV PYTHIA8=/SMASH/pythia_install/
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
